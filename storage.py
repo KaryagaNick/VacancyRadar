@@ -6,7 +6,7 @@ from config import OUTPUT_FILE
 
 
 def save_to_csv(vacancies: list[dict], output_file: Path = OUTPUT_FILE) -> None:
-    """Сохранить общую таблицу вакансий в CSV-файл."""
+    """Загрузка таблицы вакансий в CSV"""
     output_file.parent.mkdir(parents=True, exist_ok=True)
     dataframe = pd.DataFrame(vacancies)
 

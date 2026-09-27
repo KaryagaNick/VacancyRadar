@@ -1,5 +1,3 @@
-"""Создание таблицы и сохранение вакансий в PostgreSQL."""
-
 import psycopg2
 from psycopg2 import Error as DatabaseError
 from psycopg2.extras import execute_values
@@ -78,12 +76,12 @@ UPSERT_VACANCIES_SQL = """
 
 
 def empty_to_none(value: object) -> object | None:
-    """Преобразовать пустую строку в SQL NULL, сохранив False и 0."""
+    """Преобразовать пустую строку в SQL NULL"""
     return None if value in (None, "") else value
 
 
 def vacancy_to_row(vacancy: dict) -> tuple:
-    """Собрать значения вакансии в порядке столбцов таблицы."""
+    """Собрать значения вакансии в порядке столбцов таблицы"""
     values = []
     for column in VACANCY_COLUMNS:
         value = vacancy.get(column)
@@ -94,7 +92,7 @@ def vacancy_to_row(vacancy: dict) -> tuple:
 
 
 def save_to_postgres(vacancies: list[dict]) -> int:
-    """Создать таблицу при необходимости и добавить или обновить вакансии."""
+    """Создать таблицу и добавить/обновить вакансии"""
     rows = [vacancy_to_row(vacancy) for vacancy in vacancies]
     if not rows:
         return 0
@@ -110,10 +108,16 @@ def save_to_postgres(vacancies: list[dict]) -> int:
     )
 
     try:
-        with connection:
-            with connection.cursor() as cursor:
-                cursor.execute(schema_sql)
-                execute_values(cursor, UPSERT_VACANCIES_SQL, rows, page_size=100)
+        cursor = connection.cursor()
+        try:
+            cursor.execute(schema_sql)
+            execute_values(cursor, UPSERT_VACANCIES_SQL, rows, page_size=100)
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            cursor.close()
     finally:
         connection.close()
 

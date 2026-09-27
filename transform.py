@@ -1,6 +1,5 @@
 from datetime import date, datetime, timedelta, timezone
 from html.parser import HTMLParser
-
 from config import (
     EXCLUDED_TITLE_WORDS,
     MAX_EXPERIENCE,
@@ -12,7 +11,7 @@ from config import (
 
 
 class HTMLTextExtractor(HTMLParser):
-    """Небольшой стандартный HTML-парсер без дополнительной библиотеки."""
+    """HTML-парсер"""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -24,7 +23,7 @@ class HTMLTextExtractor(HTMLParser):
 
 
 def html_to_text(value: str | None) -> str | None:
-    """Удалить HTML-теги из описания международной вакансии."""
+    """Удалять теги HTML из описания международной вакансии"""
     if not value:
         return None
 
@@ -35,7 +34,7 @@ def html_to_text(value: str | None) -> str | None:
 
 
 def clean_salary(value: int | float | str | None) -> int | float | None:
-    """Преобразовать зарплату в число, а ноль и мусор — в None."""
+    """Преобразовать зарплату"""
     if value in (None, "", 0, "0"):
         return None
 
@@ -52,7 +51,7 @@ def clean_salary(value: int | float | str | None) -> int | float | None:
 
 
 def clean_experience(value: int | float | str | None) -> int | None:
-    """Преобразовать опыт в целое число, сохранив настоящее значение 0."""
+    """Преобразовать опыт в число"""
     if value in (None, ""):
         return None
 
@@ -63,18 +62,18 @@ def clean_experience(value: int | float | str | None) -> int | None:
 
 
 def normalize_currency(value: str | None) -> str | None:
-    """Привести обозначение валюты к единому виду."""
+    """Привести валюты к единому виду"""
     if value is None:
         return None
 
     currency = str(value).strip()
-    if "руб" in currency.casefold() or currency.upper() in {"RUB", "RUR"}:
+    if "руб" in currency.lower() or currency.upper() in {"RUB", "RUR"}:
         return "RUB"
     return currency.upper() or None
 
 
 def normalize_date(value: str | int | float | None) -> str | None:
-    """Преобразовать ISO-дату или Unix timestamp в YYYY-MM-DD."""
+    """Преобразовать дату"""
     if value in (None, ""):
         return None
 
@@ -98,7 +97,7 @@ def normalize_date(value: str | int | float | None) -> str | None:
 
 
 def join_values(value: object) -> str | None:
-    """Преобразовать список значений API в одну читаемую строку."""
+    """Преобразовать список значений API в одну читаемую строку"""
     if isinstance(value, list):
         items = [str(item) for item in value if item not in (None, "")]
         return "; ".join(items) or None
@@ -108,7 +107,7 @@ def join_values(value: object) -> str | None:
 
 
 def first_present(data: dict, *keys: str) -> object | None:
-    """Взять первое существующее и непустое поле из нескольких вариантов."""
+    """Взять первое существующую запись из нескольких вариантов"""
     for key in keys:
         value = data.get(key)
         if value not in (None, ""):
@@ -117,13 +116,13 @@ def first_present(data: dict, *keys: str) -> object | None:
 
 
 def is_remote_format(employment: object, schedule: object) -> bool:
-    """Определить удалённый формат по текстовым полям вакансии."""
-    work_format = f"{employment or ''} {schedule or ''}".casefold()
+    """Определить удалённый формат по текстовым полям вакансии"""
+    work_format = f"{employment or ''} {schedule or ''}".lower()
     return any(keyword in work_format for keyword in REMOTE_KEYWORDS)
 
 
 def is_recent(published_at: str | None, max_age_days: int) -> bool:
-    """Проверить, что вакансия опубликована не слишком давно."""
+    """Проверить, что вакансия опубликована не слишком давно"""
     if published_at is None:
         return False
 
@@ -133,30 +132,30 @@ def is_recent(published_at: str | None, max_age_days: int) -> bool:
 
 
 def matches_location_criteria(vacancy: dict) -> bool:
-    """Оставить удалённую работу или вакансии во Владивостоке."""
+    """Либо удаленка либо Владивосток"""
     if vacancy.get("remote") is True:
         return True
 
     place = " ".join(
         str(vacancy.get(field) or "") for field in ("location", "region")
-    ).casefold()
+    ).lower()
     return TARGET_CITY in place
 
 
 def is_allowed_seniority(value: str | None) -> bool:
-    """Отсеять уровни выше middle, сохранив обозначения Mid-level."""
+    """Отсеять уровни выше middle"""
     if not value:
         return True
 
-    seniority = value.casefold()
+    seniority = value.lower()
     excluded = ("senior", "lead", "staff", "principal", "manager", "director")
     return not any(word in seniority for word in excluded)
 
 
 def is_suitable_vacancy(vacancy: dict) -> bool:
-    """Оставить свежие и релевантные вакансии до middle включительно."""
-    title = str(vacancy.get("name") or "").casefold()
-    description = str(vacancy.get("description") or "").casefold()
+    """Оставить свежие вакансии до middle включительно"""
+    title = str(vacancy.get("name") or "").lower()
+    description = str(vacancy.get("description") or "").lower()
     experience = vacancy.get("experience")
     direction = vacancy.get("direction")
 
@@ -177,7 +176,7 @@ def is_suitable_vacancy(vacancy: dict) -> bool:
 
 
 def merge_text_values(first: str, second: str) -> str:
-    """Объединить текстовые метки без повторов."""
+    """Объединить текстовые метки без повторов"""
     values = first.split("; ")
     if second not in values:
         values.append(second)
@@ -185,7 +184,7 @@ def merge_text_values(first: str, second: str) -> str:
 
 
 def deduplicate_vacancies(vacancies: list[dict]) -> list[dict]:
-    """Удалить повторы внутри источника по его идентификатору."""
+    """Удалить повторы внутри источника по его id"""
     unique_vacancies = {}
 
     for vacancy in vacancies:

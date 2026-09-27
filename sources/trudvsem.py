@@ -1,4 +1,4 @@
-"""Получение вакансий через API «Работа России»."""
+
 
 import time
 
@@ -20,7 +20,7 @@ from transform import (
 
 
 def extract_location(vacancy: dict) -> str | None:
-    """Собрать населённые пункты из блока адресов вакансии."""
+
     addresses = vacancy.get("addresses") or {}
 
     if isinstance(addresses, dict):
@@ -45,7 +45,7 @@ def extract_location(vacancy: dict) -> str | None:
 
 
 def fetch_page(search_text: str, page_number: int) -> tuple[list[dict], int]:
-    """Получить одну страницу вакансий."""
+
     params = {
         "text": search_text,
         "limit": TRUDVSEM_PAGE_SIZE,
@@ -64,7 +64,7 @@ def fetch_page(search_text: str, page_number: int) -> tuple[list[dict], int]:
 
 
 def fetch_all(search_text: str) -> list[dict]:
-    """Получить все страницы по одному поисковому запросу."""
+
     all_vacancies = []
     page_number = 0
 
@@ -88,7 +88,7 @@ def normalize(
     search_query: str,
     loaded_at: str,
 ) -> dict:
-    """Привести вакансию к общей схеме проекта."""
+
     company = vacancy.get("company") or {}
     region = vacancy.get("region") or {}
     requirement = vacancy.get("requirement") or {}
@@ -125,7 +125,7 @@ def normalize(
 
 
 def collect_trudvsem(loaded_at: str) -> tuple[list[dict], int]:
-    """Загрузить и нормализовать все настроенные запросы источника."""
+
     vacancies = []
     loaded_count = 0
 

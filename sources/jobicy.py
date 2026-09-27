@@ -1,4 +1,4 @@
-"""Получение международных remote-вакансий через Jobicy."""
+
 
 from config import (
     INTERNATIONAL_SEARCH_QUERIES,
@@ -17,7 +17,7 @@ from transform import (
 
 
 def fetch_all(search_text: str) -> list[dict]:
-    """Получить последние worldwide-вакансии по одному запросу."""
+
     params = {
         "count": JOBICY_RESULT_LIMIT,
         "geo": "anywhere",
@@ -35,7 +35,7 @@ def normalize(
     search_query: str,
     loaded_at: str,
 ) -> dict:
-    """Привести вакансию к общей схеме проекта."""
+
     location = join_values(job.get("jobGeo")) or "Worldwide"
     is_worldwide = location.casefold() in {"anywhere", "worldwide"}
     salary_from = first_present(job, "salaryMin", "annualSalaryMin")
@@ -76,7 +76,7 @@ def normalize(
 
 
 def collect_jobicy(loaded_at: str) -> tuple[list[dict], int]:
-    """Загрузить и нормализовать все настроенные запросы источника."""
+
     vacancies = []
     loaded_count = 0
 

@@ -6,8 +6,6 @@ PROJECT_DIR = Path(__file__).resolve().parent
 OUTPUT_FILE = PROJECT_DIR / "data" / "vacancies.csv"
 DATABASE_SCHEMA_FILE = PROJECT_DIR / "sql" / "init.sql"
 
-# Значения по умолчанию совпадают с docker-compose.yml. Их можно переопределить
-# переменными окружения, не меняя исходный код.
 DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
 DB_PORT = int(os.getenv("POSTGRES_PORT", "5433"))
 DB_NAME = os.getenv("POSTGRES_DB", "job_tracker")
@@ -48,7 +46,6 @@ INTERNATIONAL_SEARCH_QUERIES = {
 }
 HIMALAYAS_SENIORITIES = ("Entry-level", "Mid-level")
 
-# Критерии: от стажировки до middle включительно.
 MAX_EXPERIENCE = 2
 MAX_VACANCY_AGE_DAYS = 90
 TARGET_CITY = "владивосток"

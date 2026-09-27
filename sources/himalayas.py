@@ -1,4 +1,4 @@
-"""Получение международных remote-вакансий через Himalayas."""
+
 
 import time
 
@@ -20,7 +20,7 @@ from transform import (
 
 
 def fetch_all(search_text: str, seniority: str) -> list[dict]:
-    """Получить worldwide-вакансии с постраничной загрузкой."""
+
     all_jobs = []
 
     for page_number in range(1, HIMALAYAS_MAX_PAGES + 1):
@@ -53,7 +53,7 @@ def normalize(
     search_query: str,
     loaded_at: str,
 ) -> dict:
-    """Привести вакансию к общей схеме проекта."""
+
     locations = join_values(job.get("locationRestrictions"))
 
     return {
@@ -85,7 +85,7 @@ def normalize(
 
 
 def collect_himalayas(loaded_at: str) -> tuple[list[dict], int]:
-    """Загрузить и нормализовать все настроенные запросы источника."""
+
     vacancies = []
     loaded_count = 0
 
